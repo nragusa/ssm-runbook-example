@@ -1,0 +1,62 @@
+# Example Amazon Systems Manager Runbook
+schemaVersion: '0.3'
+description: |-
+    **Service Stop / EC2 Resize / Service Start**
+
+    *Shuts down services, resize the EC2 instance, brings services back up*
+
+    ---
+    # What does this do?
+    This Runbook is responsible for:
+    * Gracefully shutting down services. Services include:
+    ** Service X
+    ** Service Y
+    ** Service Z
+    * Resizes the EC2 instance to a new specified size
+    * Starts up services on the newly sized instance
+assumeRole: '{{AutomationAssumeRole}}'
+parameters:
+  AutomationAssumeRole:
+    type: String
+    description: >-
+      '(Optional) The Amazon Resource Name (ARN) of the IAM role that allows Automation to perform the
+      actions on your behalf. If no role is specified, Systems Manager
+      Automation uses your IAM permissions to operate this runbook.'
+    default: ''
+  InstanceId:
+    type: String
+    description: >-
+      '(Required) The instance you want to patch.'
+  NewInstanceType:
+    type: String
+    description: '(Required) The new instance size, e.g. m6.xlarge'
+mainSteps:
+    - name: shutdownServices
+      action: aws:runCommand
+      description: Executes a shell script on the instance to shutdown services
+      inputs:
+        DocumentName: AWS-RunShellScript
+        InstanceIds:
+          - '{{InstanceId}}'
+        Parameters:
+          commands:
+            - systemctl stop httpd
+    - name: resizeInstance
+      action: aws:executeAutomation
+      description: Resizes the EC2 instance
+      inputs:
+        DocumentName: AWS-ResizeInstance
+        RuntimeParameters:
+          InstanceId: '{{InstanceId}}'
+          InstanceType: '{{NewInstanceType}}'
+    - name: restartServices
+      action: aws:runCommand
+      description: Executes a shell script on the instance to start services
+      inputs:
+        DocumentName: AWS-RunShellScript
+        InstanceIds:
+          - '{{InstanceId}}'
+        Parameters:
+          commands:
+            - systemctl start httpd      
+
