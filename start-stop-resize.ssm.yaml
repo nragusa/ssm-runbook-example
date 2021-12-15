@@ -26,7 +26,7 @@ parameters:
   InstanceId:
     type: String
     description: >-
-      '(Required) The instance you want to patch.'
+      '(Required) The instance you want to target.'
   NewInstanceType:
     type: String
     description: '(Required) The new instance size, e.g. m6.xlarge'
