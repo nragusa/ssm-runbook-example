@@ -1,4 +1,4 @@
-# Example Amazon Systems Manager Runbook
+# Example AWS Systems Manager Runbook
 schemaVersion: '0.3'
 description: |-
     **Service Stop / EC2 Resize / Service Start**
